@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PT Sayap Mas Utama - Visitor Pass</title>
+    
+    <!-- PWA Primary Meta Tags -->
+    <meta name="theme-color" content="#991b1b">
+    <meta name="description" content="Sistem Manajemen Pengunjung PT Sayap Mas Utama">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Visitor Pass">
+    
+    <!-- Tailwind CSS & Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e0a0a',
+                            900: '#140505',
+                            950: '#0a0202',
+                        },
+                        gold: {
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            accent: '#dc2626',
+                            hover: '#b91c1c',
+                            light: '#fef2f2'
+                        },
+                        slate: {
+                            850: '#261212'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styling for Luxury Corporate Wings Red Aesthetics */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #140505;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fef08a 0%, #f87171 50%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-panel {
+            background: rgba(30, 10, 10, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+
+        .glass-card {
+            background: rgba(45, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #140505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #261212;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #dc2626;
+        }
+
+        /* Print styles for Visitor Pass */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                color: #000;
+                background: #fff !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-gold-accent selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full px-6 py-4 flex justify-between items-center z-30 border-b border-white/10 glass-panel sticky top-0">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('landing-screen')">
+            <div class="w-10 h-10 rounded-full border border-gold-accent/50 flex items-center justify-center bg-navy-800 shadow-lg shadow-gold-accent/20">
+                <i class="fa-solid fa-building text-gold-accent text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-wider text-white font-serif uppercase">PT Sayap Mas Utama</h1>
+                <p class="text-[10px] tracking-widest text-gold-accent uppercase">Wings Group Indonesia</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- Admin / Receptionist Toggle -->
+            <button onclick="openAdminAuth()" class="flex items-center space-x-2 text-xs bg-white/5 border border-white/10 hover:border-gold-accent/40 text-slate-300 px-3 py-1.5 rounded-full transition-all duration-300 hover:text-white">
+                <i class="fa-solid fa-user-shield text-gold-accent"></i>
+                <span class="hidden md:inline">Resepsionis / Admin</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER WITH DYNAMIC SCREENS -->
+    <main class="flex-grow flex items-center justify-center p-4 md:p-8 relative">
+        
+        <!-- Ambient Background Lighting Glows -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/15 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-10 right-10 w-80 h-80 bg-red-900/20 rounded-full blur-[140px] pointer-events-none"></div>
+
+        <!-- ================= SCREEN 1: LANDING / WELCOME ================= -->
+        <section id="landing-screen" class="w-full max-w-4xl text-center z-10 transition-all duration-500">
+            <h1 class="text-4xl md:text-6xl font-serif font-bold tracking-tight text-white mb-4 leading-tight">
+                Selamat Datang di <br><span class="gold-gradient-text">PT Sayap Mas Utama</span>
+            </h1>
+            <p class="text-slate-300 max-w-xl mx-auto mb-10 text-sm md:text-base font-light">
+                silahkan pilih layanan di bawah ini untuk memulai proses check-in atau checkout kunjungan
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <!-- Check-In Button Card -->
+                <button onclick="showScreen('checkin-screen')" class="group relative p-8 rounded-2xl glass-panel hover:border-gold-accent transition-all duration-500 text-left flex flex-col justify-between overflow-hidden shadow-2xl hover:scale-[1.02]">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-gold-accent/10 rounded-full group-hover:scale-150 transition-all duration-700"></div>
+                    <div>
+                        <div class="w-14 h-14 rounded-xl bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-center text-gold-accent text-2xl mb-6 group-hover:bg-gold-accent group-hover:text-white transition-all duration-300">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <h3 class="text-2xl font-serif font-semibold text-white mb-2">Check In</h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed">Pendaftaran tamu baru, input data pribadi, & dapatkan Digital Visitor Pass.</p>
+                    </div>
+                    <div class="mt-8 flex items-center text-gold-accent text-sm font-semibold group-hover:translate-x-2 transition-transform duration-300">
+                        <span>Mulai Registrasi</span>
+                        <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </div>
+                </button>
+
+                <!-- Check-Out Button Card -->
+                <button onclick="showScreen('checkout-screen')" class="group relative p-8 rounded-2xl glass-panel hover:border-white/40 transition-all duration-500 text-left flex flex-col justify-between overflow-hidden shadow-2xl hover:scale-[1.02]">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-slate-700/20 rounded-full group-hover:scale-150 transition-all duration-700"></div>
+                    <div>
+                        <div class="w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-2xl mb-6 group-hover:bg-slate-200 group-hover:text-navy-950 transition-all duration-300">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </div>
+                        <h3 class="text-2xl font-serif font-semibold text-white mb-2">Check Out</h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed">Selesaikan kunjungan Anda dengan mudah menggunakan nomor telepon atau ID Pass.</p>
+                    </div>
+                    <div class="mt-8 flex items-center text-slate-300 text-sm font-semibold group-hover:translate-x-2 transition-transform duration-300">
+                        <span>Selesai Kunjungan</span>
+                        <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 2: CHECK-IN FORM ================= -->
+        <section id="checkin-screen" class="hidden w-full max-w-3xl z-10">
+            <div class="glass-panel p-6 md:p-10 rounded-2xl shadow-2xl relative">
+                <button onclick="showScreen('landing-screen')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-sm flex items-center space-x-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <div class="mb-8">
+                    <span class="text-gold-accent text-xs tracking-widest font-semibold uppercase">Langkah 1 dari 2</span>
+                    <h2 class="text-2xl md:text-3xl font-serif font-bold text-white mt-1">Formulir Pendaftaran Tamu</h2>
+                    <p class="text-slate-400 text-xs md:text-sm mt-1">Lengkapi data Anda di bawah ini untuk penerbitan E-Badge.</p>
+                </div>
+
+                <form id="checkin-form" onsubmit="handleCheckInSubmit(event)" class="space-y-6">
+                    <!-- Photo & Basic Info Row -->
+                    <div class="flex flex-col md:flex-row gap-6 items-center border-b border-white/10 pb-6">
+                        <!-- Camera / Photo Capture Widget -->
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-28 h-28 rounded-2xl bg-navy-800 border-2 border-dashed border-gold-accent/40 flex items-center justify-center overflow-hidden group">
+                                <video id="camera-feed" class="hidden absolute inset-0 w-full h-full object-cover" autoplay playsinline></video>
+                                <img id="photo-preview" class="hidden absolute inset-0 w-full h-full object-cover" alt="Visitor Photo">
+                                <div id="camera-placeholder" class="text-center p-2">
+                                    <i class="fa-solid fa-camera text-2xl text-gold-accent mb-1"></i>
+                                    <p class="text-[10px] text-slate-400">Foto Tamu</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2 mt-2">
+                                <button type="button" onclick="startCamera()" class="text-[11px] bg-white/5 hover:bg-gold-accent/20 border border-white/10 text-gold-accent px-2.5 py-1 rounded">
+                                    <i class="fa-solid fa-video mr-1"></i> Kamera
+                                </button>
+                                <button type="button" id="snap-btn" onclick="takeSnapshot()" class="hidden text-[11px] bg-gold-accent text-white font-semibold px-2.5 py-1 rounded">
+                                    Ambil
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Main Personal Info -->
+                        <div class="flex-grow w-full space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Nama Lengkap <span class="text-gold-accent">*</span></label>
+                                <input type="text" required id="vis-name" placeholder="cth. Alexander Wright" class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-300 mb-1">Nomor WhatsApp / HP <span class="text-gold-accent">*</span></label>
+                                    <input type="tel" required id="vis-phone" placeholder="081234567890" class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-300 mb-1">Email</label>
+                                    <input type="email" id="vis-email" placeholder="nama@perusahaan.com" class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visit Details Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Instansi / Perusahaan Asal <span class="text-gold-accent">*</span></label>
+                            <input type="text" required id="vis-company" placeholder="cth. PT Horizon Capital" class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Bertemu Dengan (Host) <span class="text-gold-accent">*</span></label>
+                            <div class="relative">
+                                <input type="text" required id="vis-host" placeholder="Ketik nama karyawan / host..." class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition" onkeyup="filterHosts(this.value)">
+                                <div id="host-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-navy-800 border border-gold-accent/30 rounded-xl shadow-2xl max-h-40 overflow-y-auto z-20">
+                                    <!-- Dynamic Host Suggestions -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Keperluan Kunjungan <span class="text-gold-accent">*</span></label>
+                            <select id="vis-purpose" class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                                <option value="Rapat Bisnis">Rapat Bisnis / Meeting</option>
+                                <option value="Interview / Rekrutmen">Interview / Rekrutmen</option>
+                                <option value="Pengiriman / Kurir">Pengiriman Dokumen / Barang</option>
+                                <option value="Maintenance / Audit">Maintenance / Vendor Audit</option>
+                                <option value="Kunjungan Personal">Kunjungan Personal</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Nomor Tiket / Kartu Akses <span class="text-gold-accent">*</span></label>
+                            <input type="text" required id="vis-badge-id" placeholder="Diisi sesuai petunjuk resepsionis" class="w-full bg-navy-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-4 flex items-center justify-end space-x-4">
+                        <button type="button" onclick="showScreen('landing-screen')" class="px-6 py-3 rounded-xl border border-white/10 text-slate-300 hover:bg-white/5 text-sm transition">Batal</button>
+                        <button type="submit" class="px-8 py-3 rounded-xl bg-gold-accent hover:bg-gold-hover text-white font-semibold text-sm shadow-lg shadow-gold-accent/20 transition flex items-center space-x-2">
+                            <span>Konfirmasi & Terbitkan Pass</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 3: E-BADGE / DIGITAL PASS DISPLAY ================= -->
+        <section id="ebadge-screen" class="hidden w-full max-w-lg z-10 text-center">
+            <div id="print-area" class="glass-panel p-8 rounded-3xl border border-gold-accent/40 shadow-2xl relative overflow-hidden bg-gradient-to-b from-navy-800 to-navy-900">
+                <!-- Top Badge Ribbon Header -->
+                <div class="flex justify-between items-start border-b border-white/10 pb-4 mb-6">
+                    <div class="text-left">
+                        <span class="text-[10px] text-gold-accent font-mono uppercase tracking-widest">Executive Pass</span>
+                        <h3 class="text-lg font-serif font-bold text-white uppercase">PT Sayap Mas Utama</h3>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold uppercase tracking-wider">
+                        Active In-House
+                    </span>
+                </div>
+
+                <!-- Avatar Grid (Barcode Removed) -->
+                <div class="flex flex-col items-center mb-6">
+                    <div class="w-28 h-28 rounded-2xl border-2 border-gold-accent overflow-hidden shadow-xl mb-3 bg-navy-950 flex items-center justify-center">
+                        <img id="badge-photo" src="" class="w-full h-full object-cover" alt="Visitor">
+                    </div>
+                    <h2 id="badge-name" class="text-2xl font-serif font-bold text-white mb-1">Alexander Wright</h2>
+                    <p id="badge-company" class="text-xs text-gold-accent font-medium mb-2">PT Horizon Capital</p>
+                    <p class="text-xs text-slate-300 font-mono bg-red-950/80 px-4 py-1.5 rounded-full border border-red-500/30">Nomor Tiket: <span id="badge-id" class="text-white font-bold">VNG-88392</span></p>
+                </div>
+
+                <!-- Info Matrix -->
+                <div class="grid grid-cols-2 gap-3 bg-navy-950/60 p-4 rounded-xl border border-white/5 text-left text-xs mb-6">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase">Bertemu Dengan</span>
+                        <span id="badge-host" class="text-slate-200 font-semibold">Bpk. Hendra Wijaya</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase">Waktu Masuk</span>
+                        <span id="badge-time" class="text-slate-200 font-semibold">10:30 WIB</span>
+                    </div>
+                    <div class="col-span-2 border-t border-white/5 pt-2">
+                        <span class="text-slate-400 block text-[10px] uppercase">Keperluan</span>
+                        <span id="badge-purpose" class="text-slate-200 font-semibold">Rapat Bisnis</span>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-400 italic mb-6">
+                    <i class="fa-solid fa-bell text-gold-accent mr-1"></i> Host Anda telah dinotifikasi melalui sistem internal.
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 no-print">
+                    <button onclick="window.print()" class="flex-1 py-2.5 rounded-xl border border-gold-accent/40 text-gold-accent hover:bg-gold-accent hover:text-white font-semibold text-xs transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak Pass / Save</span>
+                    </button>
+                    <button onclick="showScreen('landing-screen')" class="flex-1 py-2.5 rounded-xl bg-gold-accent hover:bg-gold-hover text-white font-semibold text-xs transition">
+                        Selesai
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 4: CHECK-OUT SEARCH & CONFIRM ================= -->
+        <section id="checkout-screen" class="hidden w-full max-w-xl z-10">
+            <div class="glass-panel p-8 rounded-2xl shadow-2xl relative">
+                <button onclick="showScreen('landing-screen')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <div class="text-center mb-8">
+                    <div class="w-12 h-12 rounded-full bg-slate-800 text-gold-accent border border-gold-accent/30 flex items-center justify-center mx-auto mb-3 text-xl">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </div>
+                    <h2 class="text-2xl font-serif font-bold text-white">Check Out Visitor</h2>
+                    <p class="text-slate-400 text-xs mt-1">Masukkan Nomor Telepon, Nomor Tiket, atau Nama Anda untuk penyelesaian kunjungan.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="relative">
+                        <input type="text" id="checkout-search-input" onkeyup="searchVisitorForCheckout(this.value)" placeholder="Cari No. HP / No. Tiket / Nama..." class="w-full bg-navy-900/90 border border-gold-accent/30 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-gold-accent transition">
+                        <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400"></i>
+                    </div>
+
+                    <!-- Search Results Area -->
+                    <div id="checkout-results-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 5: THANK YOU SCREEN ================= -->
+        <section id="thankyou-screen" class="hidden w-full max-w-lg z-10 text-center">
+            <div class="glass-panel p-10 rounded-3xl border border-gold-accent/30 shadow-2xl relative overflow-hidden">
+                <div class="w-20 h-20 rounded-full bg-gold-accent/10 border border-gold-accent text-gold-accent flex items-center justify-center mx-auto mb-6 text-3xl animate-bounce">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+
+                <h2 class="text-3xl font-serif font-bold text-white mb-2">Terima Kasih Atas Kunjungan Anda</h2>
+                <p class="text-slate-300 text-sm mb-6 leading-relaxed">
+                    Proses Check-Out berhasil. Semoga urusan Anda menyenangkan & selamat sampai tujuan kembali!
+                </p>
+
+                <div class="p-4 rounded-xl bg-navy-950/60 border border-white/5 mb-8 inline-block">
+                    <p class="text-xs text-slate-400">Halaman ini akan kembali ke layar utama secara otomatis dalam:</p>
+                    <p id="countdown-timer" class="text-2xl font-serif font-bold text-gold-accent mt-1">5 Detik</p>
+                </div>
+
+                <div>
+                    <button onclick="showScreen('landing-screen')" class="px-8 py-3 rounded-xl bg-gold-accent hover:bg-gold-hover text-white font-semibold text-xs tracking-wider uppercase transition">
+                        Kembali Ke Layar Utama
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 6: RECEPTIONIST / ADMIN DASHBOARD ================= -->
+        <section id="admin-screen" class="hidden w-full max-w-6xl z-10">
+            <div class="glass-panel p-6 rounded-2xl shadow-2xl border border-gold-accent/30">
+                <!-- Dashboard Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-6 mb-6 gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <h2 class="text-2xl font-serif font-bold text-white">Resepsionis & Monitor Tamu</h2>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Sistem Pemantauan Gedung Real-Time PT Sayap Mas Utama</p>
+                    </div>
+
+                    <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                        <button onclick="exportToCSV()" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-gold-accent/20 border border-white/10 text-gold-accent text-xs transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Ekspor Data (CSV)</span>
+                        </button>
+                        <button onclick="showScreen('landing-screen')" class="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs transition">
+                            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Keluar Admin
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="p-4 rounded-xl glass-card border border-gold-accent/20 flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-lg bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-center text-gold-accent text-xl">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Tamu Aktif Saat Ini</span>
+                            <span id="stat-active-count" class="text-2xl font-bold text-white">0</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl glass-card border border-white/10 flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Total Checked Out Hari Ini</span>
+                            <span id="stat-checkout-count" class="text-2xl font-bold text-white">0</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl glass-card border border-white/10 flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-xl">
+                            <i class="fa-solid fa-id-badge"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Total Kunjungan Hari Ini</span>
+                            <span id="stat-total-count" class="text-2xl font-bold text-white">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Controls -->
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="admin-search-input" onkeyup="renderAdminTable()" placeholder="Cari data pengunjung..." class="w-full bg-navy-950/80 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-gold-accent">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                    </div>
+
+                    <!-- Status Filter Tabs -->
+                    <div class="flex space-x-2 bg-navy-950 p-1 rounded-xl border border-white/5 w-full sm:w-auto justify-center">
+                        <button onclick="setAdminFilter('all')" id="filter-all" class="px-3 py-1 text-xs rounded-lg bg-gold-accent text-white font-semibold">Semua</button>
+                        <button onclick="setAdminFilter('active')" id="filter-active" class="px-3 py-1 text-xs rounded-lg text-slate-400 hover:text-white">Aktif (In-House)</button>
+                        <button onclick="setAdminFilter('completed')" id="filter-completed" class="px-3 py-1 text-xs rounded-lg text-slate-400 hover:text-white">Selesai</button>
+                    </div>
+                </div>
+
+                <!-- Visitors Data Table -->
+                <div class="overflow-x-auto rounded-xl border border-white/10">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-navy-950/90 text-[11px] uppercase tracking-wider text-slate-400 border-b border-white/10">
+                                <th class="p-3.5">Tamu & Perusahaan</th>
+                                <th class="p-3.5">Kontak</th>
+                                <th class="p-3.5">Bertemu Host</th>
+                                <th class="p-3.5">Waktu Masuk / Keluar</th>
+                                <th class="p-3.5">Status</th>
+                                <th class="p-3.5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-white/5 text-xs text-slate-300">
+                            <!-- Dynamically Generated Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full py-4 text-center text-[11px] text-slate-500 border-t border-white/5 bg-navy-950/80 backdrop-blur z-20">
+        <p>© 2026 PT Sayap Mas Utama (Wings Group). Secure Visitor Management System.</p>
+    </footer>
+
+    <!-- PIN AUTH MODAL FOR ADMIN -->
+    <div id="admin-pin-modal" class="hidden fixed inset-0 bg-navy-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-2xl max-w-sm w-full text-center border border-gold-accent/30 shadow-2xl">
+            <i class="fa-solid fa-lock text-3xl text-gold-accent mb-3"></i>
+            <h3 class="text-xl font-serif font-bold text-white mb-1">Akses Resepsionis</h3>
+            <p class="text-xs text-slate-400 mb-4">Masukkan PIN Keamanan untuk membuka dashboard (Default: 1234)</p>
+            
+            <input type="password" id="admin-pin-input" maxlength="4" placeholder="••••" class="w-32 mx-auto text-center text-2xl font-mono tracking-widest bg-navy-900 border border-gold-accent/40 rounded-xl py-2 mb-4 text-gold-accent focus:outline-none">
+            
+            <div class="flex space-x-3">
+                <button onclick="closeAdminAuth()" class="flex-1 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5">Batal</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-2 text-xs bg-gold-accent hover:bg-gold-hover text-white font-bold rounded-xl">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // --- GLOBAL APP STATE & DUMMY DATA ---
+        let currentFilter = 'all';
+        let mediaStream = null;
+        let capturedPhotoData = null;
+        let countdownInterval = null;
+
+        // Sample Host Directory
+        const employeesList = [
+            { name: "Hendra Wijaya", dept: "Direksi / Executive" },
+            { name: "Siti Rahmawati", dept: "Human Capital" },
+            { name: "Budi Santoso", dept: "Finance & Treasury" },
+            { name: "Diana Putri", dept: "IT & Technology" },
+            { name: "Reza Pratama", dept: "Legal & Corporate Secretary" }
+        ];
+
+        // Default Sample Visitors Data in LocalStorage
+        const defaultVisitors = [
+            {
+                id: "SMU-101",
+                name: "Rian Hidayat",
+                phone: "081122334455",
+                email: "rian@techcorp.id",
+                company: "PT TechCorp Indonesia",
+                purpose: "Rapat Bisnis",
+                host: "Diana Putri (IT)",
+                checkInTime: "09:15 WIB",
+                checkOutTime: null,
+                status: "ACTIVE",
+                photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+            },
+            {
+                id: "SMU-102",
+                name: "Clara Sinta",
+                phone: "081987654321",
+                email: "clara@designstudio.com",
+                company: "Design Studio",
+                purpose: "Interview / Rekrutmen",
+                host: "Siti Rahmawati (HC)",
+                checkInTime: "08:30 WIB",
+                checkOutTime: "10:00 WIB",
+                status: "COMPLETED",
+                photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80"
+            }
+        ];
+
+        // Initialize LocalStorage Data
+        function getVisitors() {
+            const stored = localStorage.getItem('smu_visitors');
+            if (!stored) {
+                localStorage.setItem('smu_visitors', JSON.stringify(defaultVisitors));
+                return defaultVisitors;
+            }
+            return JSON.parse(stored);
+        }
+
+        function saveVisitors(data) {
+            localStorage.setItem('smu_visitors', JSON.stringify(data));
+        }
+
+        // --- NAVIGATION ROUTER ---
+        function showScreen(screenId) {
+            // Hide all screens
+            const screens = ['landing-screen', 'checkin-screen', 'ebadge-screen', 'checkout-screen', 'thankyou-screen', 'admin-screen'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+
+            // Stop Camera Feed if moving away from check-in
+            if (screenId !== 'checkin-screen' && mediaStream) {
+                stopCamera();
+            }
+
+            // Clear Countdown if leaving Thankyou
+            if (screenId !== 'thankyou-screen' && countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            // Show selected screen
+            const target = document.getElementById(screenId);
+            if (target) target.classList.remove('hidden');
+
+            // Screen Specific Actions
+            if (screenId === 'checkin-screen') {
+                resetCheckInForm();
+            } else if (screenId === 'admin-screen') {
+                renderAdminTable();
+            } else if (screenId === 'checkout-screen') {
+                renderCheckoutList();
+            }
+        }
+
+        // --- CAMERA WEB API LOGIC ---
+        async function startCamera() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const videoEl = document.getElementById('camera-feed');
+                videoEl.srcObject = mediaStream;
+                videoEl.classList.remove('hidden');
+                document.getElementById('camera-placeholder').classList.add('hidden');
+                document.getElementById('snap-btn').classList.remove('hidden');
+            } catch (err) {
+                alert("Kamera tidak dapat diakses atau diblokir. Foto default akan digunakan.");
+            }
+        }
+
+        function takeSnapshot() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, 300, 300);
+            
+            capturedPhotoData = canvas.toDataURL('image/png');
+            
+            const imgPreview = document.getElementById('photo-preview');
+            imgPreview.src = capturedPhotoData;
+            imgPreview.classList.remove('hidden');
+            
+            stopCamera();
+        }
+
+        function stopCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            document.getElementById('camera-feed').classList.add('hidden');
+            document.getElementById('snap-btn').classList.add('hidden');
+        }
+
+        // --- HOST AUTO-COMPLETE LOGIC ---
+        function filterHosts(query) {
+            const dropdown = document.getElementById('host-dropdown');
+            if (!query) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+
+            const matches = employeesList.filter(emp => 
+                emp.name.toLowerCase().includes(query.toLowerCase()) || 
+                emp.dept.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (matches.length > 0) {
+                dropdown.innerHTML = matches.map(emp => `
+                    <div onclick="selectHost('${emp.name} (${emp.dept})')" class="p-2.5 hover:bg-gold-accent/20 cursor-pointer text-xs border-b border-white/5 flex justify-between">
+                        <span class="text-white font-medium">${emp.name}</span>
+                        <span class="text-gold-accent font-mono">${emp.dept}</span>
+                    </div>
+                `).join('');
+                dropdown.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        function selectHost(hostValue) {
+            document.getElementById('vis-host').value = hostValue;
+            document.getElementById('host-dropdown').classList.add('hidden');
+        }
+
+        // --- CHECK-IN SUBMISSION & E-BADGE GENERATION ---
+        function resetCheckInForm() {
+            document.getElementById('checkin-form').reset();
+            document.getElementById('photo-preview').classList.add('hidden');
+            document.getElementById('camera-placeholder').classList.remove('hidden');
+            capturedPhotoData = null;
+        }
+
+        function handleCheckInSubmit(e) {
+            e.preventDefault();
+
+            const badgeID = document.getElementById('vis-badge-id').value;
+            const name = document.getElementById('vis-name').value;
+            const phone = document.getElementById('vis-phone').value;
+            const email = document.getElementById('vis-email').value || '-';
+            const company = document.getElementById('vis-company').value;
+            const host = document.getElementById('vis-host').value;
+            const purpose = document.getElementById('vis-purpose').value;
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+            
+            // Default avatar fallback if photo wasn't taken
+            const photoUrl = capturedPhotoData || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=dc2626&color=ffffff&bold=true`;
+
+            const newVisitor = {
+                id: badgeID,
+                name: name,
+                phone: phone,
+                email: email,
+                company: company,
+                host: host,
+                purpose: purpose,
+                checkInTime: timeStr,
+                checkOutTime: null,
+                status: 'ACTIVE',
+                photo: photoUrl
+            };
+
+            // Save to LocalStorage
+            const visitors = getVisitors();
+            visitors.unshift(newVisitor);
+            saveVisitors(visitors);
+
+            // Populate E-Badge Modal
+            document.getElementById('badge-id').innerText = badgeID;
+            document.getElementById('badge-name').innerText = name;
+            document.getElementById('badge-company').innerText = company;
+            document.getElementById('badge-host').innerText = host;
+            document.getElementById('badge-time').innerText = timeStr;
+            document.getElementById('badge-purpose').innerText = purpose;
+            document.getElementById('badge-photo').src = photoUrl;
+
+            // Show E-Badge Screen
+            showScreen('ebadge-screen');
+        }
+
+        // --- CHECK-OUT LOGIC ---
+        function renderCheckoutList(query = '') {
+            const visitors = getVisitors().filter(v => v.status === 'ACTIVE');
+            const container = document.getElementById('checkout-results-container');
+
+            const filtered = visitors.filter(v => 
+                v.name.toLowerCase().includes(query.toLowerCase()) || 
+                v.phone.includes(query) || 
+                v.id.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-slate-500 text-xs">
+                        ${query ? 'Tamu aktif tidak ditemukan.' : 'Tidak ada tamu yang sedang aktif di dalam gedung.'}
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(v => `
+                <div class="glass-card p-3.5 rounded-xl border border-white/10 flex items-center justify-between hover:border-gold-accent/40 transition">
+                    <div class="flex items-center space-x-3">
+                        <img src="${v.photo}" class="w-10 h-10 rounded-lg object-cover border border-gold-accent/30" alt="Avatar">
+                        <div>
+                            <h4 class="text-xs font-bold text-white">${v.name}</h4>
+                            <p class="text-[10px] text-slate-400">${v.company} • No. Tiket: <span class="text-gold-accent font-mono">${v.id}</span></p>
+                            <p class="text-[10px] text-slate-500">Masuk: ${v.checkInTime}</p>
+                        </div>
+                    </div>
+                    <button onclick="processCheckOut('${v.id}')" class="px-3 py-1.5 rounded-lg bg-gold-accent hover:bg-gold-hover text-white font-semibold text-xs transition">
+                        Check Out
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function searchVisitorForCheckout(val) {
+            renderCheckoutList(val);
+        }
+
+        function processCheckOut(badgeId) {
+            const visitors = getVisitors();
+            const visitor = visitors.find(v => v.id === badgeId);
+
+            if (visitor) {
+                const now = new Date();
+                visitor.checkOutTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+                visitor.status = 'COMPLETED';
+                saveVisitors(visitors);
+
+                // Show Thank You Screen with Countdown Auto-Redirect
+                showScreen('thankyou-screen');
+                startThankYouCountdown();
+            }
+        }
+
+        function startThankYouCountdown() {
+            let seconds = 5;
+            const timerEl = document.getElementById('countdown-timer');
+            timerEl.innerText = `${seconds} Detik`;
+
+            countdownInterval = setInterval(() => {
+                seconds--;
+                timerEl.innerText = `${seconds} Detik`;
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    showScreen('landing-screen');
+                }
+            }, 1000);
+        }
+
+        // --- ADMIN / RECEPTIONIST DASHBOARD LOGIC ---
+        function openAdminAuth() {
+            document.getElementById('admin-pin-modal').classList.remove('hidden');
+            document.getElementById('admin-pin-input').focus();
+        }
+
+        function closeAdminAuth() {
+            document.getElementById('admin-pin-modal').classList.add('hidden');
+            document.getElementById('admin-pin-input').value = '';
+        }
+
+        function verifyAdminPin() {
+            const pin = document.getElementById('admin-pin-input').value;
+            if (pin === '1234') { // Default Admin PIN
+                closeAdminAuth();
+                showScreen('admin-screen');
+            } else {
+                alert("PIN Salah! Gunakan PIN default: 1234");
+                document.getElementById('admin-pin-input').value = '';
+            }
+        }
+
+        function setAdminFilter(filter) {
+            currentFilter = filter;
+            
+            // Update Tab Highlights
+            ['all', 'active', 'completed'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (f === filter) {
+                    btn.className = "px-3 py-1 text-xs rounded-lg bg-gold-accent text-white font-semibold";
+                } else {
+                    btn.className = "px-3 py-1 text-xs rounded-lg text-slate-400 hover:text-white";
+                }
+            });
+
+            renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const visitors = getVisitors();
+            const searchVal = document.getElementById('admin-search-input').value.toLowerCase();
+            const tbody = document.getElementById('admin-table-body');
+
+            // Update Header Stats
+            const activeCount = visitors.filter(v => v.status === 'ACTIVE').length;
+            const completedCount = visitors.filter(v => v.status === 'COMPLETED').length;
+            document.getElementById('stat-active-count').innerText = activeCount;
+            document.getElementById('stat-checkout-count').innerText = completedCount;
+            document.getElementById('stat-total-count').innerText = visitors.length;
+
+            // Filter Data
+            let filtered = visitors.filter(v => {
+                if (currentFilter === 'active') return v.status === 'ACTIVE';
+                if (currentFilter === 'completed') return v.status === 'COMPLETED';
+                return true;
+            });
+
+            if (searchVal) {
+                filtered = filtered.filter(v => 
+                    v.name.toLowerCase().includes(searchVal) ||
+                    v.company.toLowerCase().includes(searchVal) ||
+                    v.id.toLowerCase().includes(searchVal) ||
+                    v.host.toLowerCase().includes(searchVal)
+                );
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">Tidak ada data kunjungan ditemukan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(v => `
+                <tr class="hover:bg-white/5 transition">
+                    <td class="p-3.5">
+                        <div class="flex items-center space-x-3">
+                            <img src="${v.photo}" class="w-8 h-8 rounded-full object-cover border border-gold-accent/30" alt="Avatar">
+                            <div>
+                                <div class="font-bold text-white">${v.name}</div>
+                                <div class="text-[10px] text-slate-400">${v.company} • No. Tiket: <span class="font-mono text-gold-accent">${v.id}</span></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-3.5">
+                        <div>${v.phone}</div>
+                        <div class="text-[10px] text-slate-400">${v.email}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <div class="text-slate-200">${v.host}</div>
+                        <div class="text-[10px] text-gold-accent">${v.purpose}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <div class="text-emerald-400">In: ${v.checkInTime}</div>
+                        <div class="text-slate-400 text-[10px]">${v.checkOutTime ? 'Out: ' + v.checkOutTime : '-'}</div>
+                    </td>
+                    <td class="p-3.5">
+                        ${v.status === 'ACTIVE' 
+                            ? `<span class="px-2 py-0.5 rounded-full text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">Active In-House</span>`
+                            : `<span class="px-2 py-0.5 rounded-full text-[9px] bg-slate-700/50 text-slate-400 border border-slate-600 font-semibold">Checked Out</span>`
+                        }
+                    </td>
+                    <td class="p-3.5 text-right">
+                        ${v.status === 'ACTIVE' 
+                            ? `<button onclick="processCheckOut('${v.id}')" class="px-2.5 py-1 rounded bg-gold-accent/20 hover:bg-gold-accent hover:text-white text-gold-accent text-[11px] font-medium transition">Check Out</button>`
+                            : `<span class="text-slate-500 text-[10px] italic">Selesai</span>`
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- EXPORT TO CSV FEATURE ---
+        function exportToCSV() {
+            const visitors = getVisitors();
+            if (visitors.length === 0) {
+                alert("Tidak ada data untuk diekspor!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,No Tiket,Nama Tamu,No Telepon,Email,Instansi,Host,Keperluan,Waktu Masuk,Waktu Keluar,Status\n";
+
+            visitors.forEach(v => {
+                const row = `"${v.id}","${v.name}","${v.phone}","${v.email}","${v.company}","${v.host}","${v.purpose}","${v.checkInTime}","${v.checkOutTime || '-'}","${v.status}"`;
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `SayapMasUtama_Visitors_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
